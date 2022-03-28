@@ -1,0 +1,2197 @@
+<Project version="20.5.0.4" edition="pro" localizationFileName="C:\Program Files (x86)\SQL Maestro Group\PHP Generator for MySQL Professional\lang.en.php" phpDriver="1" outputPath="C:\xampp\htdocs" copySystemFiles="true" generateModifiedDataOnly="false" outputFilesExtension="php" colorSchemeName="default">
+  <ConnectionOptions host="localhost" port="3306" login="root" password="" database="qm3" client_encoding="utf8" allow_old_password="false">
+    <ssh_secure secure="false" port="22" authentication_mode="0"/>
+    <http_tunnel tunneling="false" url="">
+      <http_proxy_server use_proxy="false" port="8080"/>
+      <http_authentication/>
+    </http_tunnel>
+  </ConnectionOptions>
+  <ScriptConnectionOptions host="localhost" port="3306" login="root" password="" database="qm3" client_encoding="utf8" allow_old_password="false">
+    <ssh_secure secure="false" port="22" authentication_mode="0"/>
+    <http_tunnel tunneling="false" url="">
+      <http_proxy_server use_proxy="false" port="8080"/>
+      <http_authentication/>
+    </http_tunnel>
+  </ScriptConnectionOptions>
+  <DataSources>
+    <DataSource name="teams"/>
+    <DataSource name="RTM-mini" createTopLevelPage="false" type="query">
+      <SelectStatement>
+select cri.appid, cri.criteriaid, count(cri.testcaseid) as `covered`, CASE WHEN count(cri.testcaseid) &lt; 1 OR AVG(ru.status) is null THEN 0 WHEN AVG(ru.status) &gt; 1 THEN 2 ELSE 1 END AS tcstatus from (SELECT c.appid, c.id as criteriaid, c.code, ct.testcaseid FROM criterias c left join criteria_testcase ct on c.id=ct.criteriaid) cri left JOIN (SELECT * FROM `run` r WHERE r.createdate in(select max(createdate) from run r2 WHERE r2.testcaseid = r.testcaseid)) ru on cri.testcaseid = ru.testcaseid group by cri.criteriaid      </SelectStatement>
+    </DataSource>
+    <DataSource name="RTMD" createTopLevelPage="false" type="query">
+      <SelectStatement>
+select cri.criteriaid, if(cri.testcaseid is null,'Not cover',cri.testcaseid) as `testcases` , if(ru.status is null, 0, ru.status) as `lastrun`, ru.createdate, ru.env , ru.runby from (SELECT c.id as criteriaid, c.code, ct.testcaseid FROM criterias c left join criteria_testcase ct on c.id=ct.criteriaid) cri left JOIN run ru on cri.testcaseid = ru.testcaseid      </SelectStatement>
+    </DataSource>
+    <DataSource name="RTMT" createTopLevelPage="false" type="query">
+      <SelectStatement>
+select teamid as rtm_teamid, cri2.appid, cri2.criteriaid, cri2.covered, cri2.tcstatus from (select cri.appid, cri.criteriaid, count(cri.testcaseid) as `covered`, case when max(ru.status) is null then 0 when max(ru.status) &lt;=&gt;3 then 3 when min(ru.status) &lt;=&gt;0 and max(ru.status) &lt;=&gt;1 then 2 when max(ru.status) &lt;=&gt;0 then 0 ELSE 1 end AS tcstatus from (SELECT c.appid, c.id as criteriaid, c.code, ct.testcaseid FROM criterias c left join criteria_testcase ct on c.id=ct.criteriaid) cri left JOIN (SELECT * FROM `run` r WHERE r.createdate in(select max(createdate) from run r2 WHERE r2.testcaseid = r.testcaseid)) ru on cri.testcaseid = ru.testcaseid group by cri.criteriaid) as cri2 INNER JOIN applications on cri2.appid = applications.id      </SelectStatement>
+    </DataSource>
+    <DataSource name="questions"/>
+    <DataSource name="RTM" type="query">
+      <SelectStatement>
+select teamid as rtm_teamid, cri2.appid,concat(cast((sum(if(cri2.covered &gt; 0, 1, 0))/count(cri2.criteriaid)) as DECIMAL)*100,'%') as covered,case when max(cri2.tcstatus) is null then 0 when max(cri2.tcstatus) &lt;=&gt;3 then 3 when min(cri2.tcstatus) &lt;=&gt;0 and max(cri2.tcstatus) &lt;=&gt;1 then 2 when max(cri2.tcstatus) &lt;=&gt;0 then 0 else 1 END AS appstatus from (select cri.appid, cri.criteriaid, count(cri.testcaseid) as `covered`, case when max(ru.status) is null then 0 when max(ru.status) &lt;=&gt;3 then 3 when min(ru.status) &lt;=&gt;0 and max(ru.status) &lt;=&gt;1 then 2 when max(ru.status) &lt;=&gt;0 then 0 ELSE 1 end AS tcstatus from (SELECT c.appid, c.id as criteriaid, c.code, ct.testcaseid FROM criterias c left join criteria_testcase ct on c.id=ct.criteriaid) cri left JOIN (SELECT * FROM `run` r WHERE r.createdate in(select max(createdate) from run r2 WHERE r2.testcaseid = r.testcaseid)) ru on cri.testcaseid = ru.testcaseid group by cri.criteriaid) as cri2 INNER JOIN applications on cri2.appid = applications.id group by cri2.appid order by cri2.tcstatus desc      </SelectStatement>
+    </DataSource>
+  </DataSources>
+  <Presentation disableMagicQuotesRuntime="false" showEnvironmentVariables="false" showExecutedQueries="false" showPHPErrorsAndWarnings="false" enableInactivityTimeout="true" inactivityTimeoutInterval="1440" setHomePageAsStartupPage="true">
+    <Pages>
+      <Page type="table" tableName="teams" numberByDataSource="0" fileName="teams" caption="Teams" shortCaption="Teams" addSeparator="false" horizontalFilterCondition="`teamid` in (SELECT `teamid` FROM `user_teams` WHERE userid = '%CURRENT_USER_ID%') or teams_userid = '%CURRENT_USER_ID%'" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+        <BeforeGridText/>
+        <DetailedDescription/>
+        <ColumnPresentations>
+          <ColumnPresentation fieldName="teamid" caption="Teamid" showColumnFilter="false" selectedFilterOperators="1589247">
+            <ViewProperties type="text"/>
+            <EditProperties type="textBox" maxLength="36"/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="name" caption="Name" showColumnFilter="false" selectedFilterOperators="1589247">
+            <ViewProperties type="text" maxLength="75"/>
+            <EditProperties type="textBox" maxLength="100"/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="teams_userid" caption="Teams Userid" controlVisible="false" defaultInsertValue="%CURRENT_USER_ID%" selectedFilterOperators="1589247">
+            <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+            <ViewProperties type="text" maxLength="75"/>
+            <EditProperties type="dynamicCombobox"/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="createdate" caption="Createdate" canSetNull="true" selectedFilterOperators="2031871">
+            <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+            <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="lastchange" caption="Lastchange" canSetNull="true" selectedFilterOperators="2031871">
+            <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+            <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+          </ColumnPresentation>
+        </ColumnPresentations>
+        <Columns>
+          <List>
+            <Column fieldName="teamid" visible="false"/>
+            <Column fieldName="name"/>
+            <Column fieldName="teams_userid" visible="false"/>
+            <Column fieldName="createdate" visible="false"/>
+            <Column fieldName="lastchange" visible="false"/>
+          </List>
+          <View>
+            <Column fieldName="teamid"/>
+            <Column fieldName="name"/>
+            <Column fieldName="teams_userid"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+          </View>
+          <Edit>
+            <Column fieldName="teamid" visible="false"/>
+            <Column fieldName="name"/>
+            <Column fieldName="teams_userid" visible="false"/>
+            <Column fieldName="createdate" visible="false"/>
+            <Column fieldName="lastchange" visible="false"/>
+          </Edit>
+          <Insert>
+            <Column fieldName="teamid" visible="false"/>
+            <Column fieldName="name"/>
+            <Column fieldName="teams_userid"/>
+            <Column fieldName="createdate" visible="false"/>
+            <Column fieldName="lastchange" visible="false"/>
+          </Insert>
+          <QuickFilter>
+            <Column fieldName="teamid"/>
+            <Column fieldName="name"/>
+            <Column fieldName="teams_userid"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+          </QuickFilter>
+          <FilterBuilder>
+            <Column fieldName="teamid"/>
+            <Column fieldName="name"/>
+            <Column fieldName="teams_userid"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+          </FilterBuilder>
+          <Print>
+            <Column fieldName="teamid"/>
+            <Column fieldName="name"/>
+            <Column fieldName="teams_userid"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+          </Print>
+          <Export>
+            <Column fieldName="teamid"/>
+            <Column fieldName="name"/>
+            <Column fieldName="teams_userid"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+          </Export>
+          <Compare>
+            <Column fieldName="teamid"/>
+            <Column fieldName="name"/>
+            <Column fieldName="teams_userid"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+          </Compare>
+          <MultiEdit>
+            <Column fieldName="teamid" visible="false"/>
+            <Column fieldName="name"/>
+            <Column fieldName="teams_userid" visible="false"/>
+            <Column fieldName="createdate" visible="false"/>
+            <Column fieldName="lastchange" visible="false"/>
+          </MultiEdit>
+        </Columns>
+        <Details>
+          <Detail caption="Applications">
+            <Page type="table" tableName="applications" numberByDataSource="0" fileName="" caption="Applications" shortCaption="Applications" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+              <BeforeGridText/>
+              <DetailedDescription/>
+              <ColumnPresentations>
+                <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1589247">
+                  <ViewProperties type="text"/>
+                  <EditProperties type="textBox" maxLength="36"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="teamid" caption="Teamid" canSetNull="true" selectedFilterOperators="1589247">
+                  <Lookup tableName="teams" linkFieldName="teamid" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="application" caption="Application" showColumnFilter="false" selectedFilterOperators="1589247">
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="createdate" caption="Createdate" canSetNull="true" selectedFilterOperators="2031871">
+                  <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+                  <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="lastchange" caption="Lastchange" canSetNull="true" selectedFilterOperators="2031871">
+                  <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+                  <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="applications_userid" caption="Applications Userid" controlVisible="false" defaultInsertValue="%CURRENT_USER_ID%" selectedFilterOperators="1589247">
+                  <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+              </ColumnPresentations>
+              <Columns>
+                <List>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="teamid" visible="false"/>
+                  <Column fieldName="application"/>
+                  <Column fieldName="createdate" visible="false"/>
+                  <Column fieldName="lastchange" visible="false"/>
+                  <Column fieldName="applications_userid" visible="false"/>
+                </List>
+                <View>
+                  <Column fieldName="id"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="application"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="applications_userid"/>
+                </View>
+                <Edit>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="teamid" visible="false"/>
+                  <Column fieldName="application"/>
+                  <Column fieldName="createdate" visible="false"/>
+                  <Column fieldName="lastchange" visible="false"/>
+                  <Column fieldName="applications_userid" visible="false"/>
+                </Edit>
+                <Insert>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="application"/>
+                  <Column fieldName="createdate" visible="false"/>
+                  <Column fieldName="lastchange" visible="false"/>
+                  <Column fieldName="applications_userid"/>
+                </Insert>
+                <QuickFilter>
+                  <Column fieldName="id"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="application"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="applications_userid"/>
+                </QuickFilter>
+                <FilterBuilder>
+                  <Column fieldName="id"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="application"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="applications_userid"/>
+                </FilterBuilder>
+                <Print>
+                  <Column fieldName="id"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="application"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="applications_userid"/>
+                </Print>
+                <Export>
+                  <Column fieldName="id"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="application"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="applications_userid"/>
+                </Export>
+                <Compare>
+                  <Column fieldName="id"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="application"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="applications_userid"/>
+                </Compare>
+                <MultiEdit>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="teamid" visible="false"/>
+                  <Column fieldName="application"/>
+                  <Column fieldName="createdate" visible="false"/>
+                  <Column fieldName="lastchange" visible="false"/>
+                  <Column fieldName="applications_userid" visible="false"/>
+                </MultiEdit>
+              </Columns>
+              <Details>
+                <Detail caption="Criterias">
+                  <Page type="table" tableName="criterias" numberByDataSource="0" fileName="" caption="Criterias" shortCaption="Criterias" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+                    <BeforeGridText/>
+                    <DetailedDescription/>
+                    <ColumnPresentations>
+                      <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1589247">
+                        <ViewProperties type="text"/>
+                        <EditProperties type="textBox" maxLength="36"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="code" caption="Code" showColumnFilter="false" selectedFilterOperators="1589247">
+                        <ViewProperties type="text" maxLength="75"/>
+                        <EditProperties type="textBox" maxLength="100"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="criteriadesc" caption="Criteriadesc" showColumnFilter="false" selectedFilterOperators="1589247">
+                        <ViewProperties type="text" maxLength="75"/>
+                        <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="parent" caption="Parent" canSetNull="true" selectedFilterOperators="1589247">
+                        <Lookup tableName="criterias" linkFieldName="id" displayFieldName="code" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="criterias_userid" caption="Criterias Userid" controlVisible="false" defaultInsertValue="%CURRENT_USER_ID%" selectedFilterOperators="1589247">
+                        <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text" maxLength="75"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="appid" caption="Appid" canSetNull="true" controlVisible="false" selectedFilterOperators="1589247">
+                        <Lookup tableName="applications" linkFieldName="id" displayFieldName="teamid" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                    </ColumnPresentations>
+                    <Columns>
+                      <List>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="code"/>
+                        <Column fieldName="criteriadesc"/>
+                        <Column fieldName="parent"/>
+                        <Column fieldName="criterias_userid" visible="false"/>
+                        <Column fieldName="appid" visible="false"/>
+                      </List>
+                      <View>
+                        <Column fieldName="id"/>
+                        <Column fieldName="code"/>
+                        <Column fieldName="criteriadesc"/>
+                        <Column fieldName="parent"/>
+                        <Column fieldName="criterias_userid"/>
+                        <Column fieldName="appid"/>
+                      </View>
+                      <Edit>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="code"/>
+                        <Column fieldName="criteriadesc"/>
+                        <Column fieldName="parent"/>
+                        <Column fieldName="criterias_userid" visible="false"/>
+                        <Column fieldName="appid" visible="false"/>
+                      </Edit>
+                      <Insert>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="code"/>
+                        <Column fieldName="criteriadesc"/>
+                        <Column fieldName="parent"/>
+                        <Column fieldName="criterias_userid"/>
+                        <Column fieldName="appid"/>
+                      </Insert>
+                      <QuickFilter>
+                        <Column fieldName="id"/>
+                        <Column fieldName="code"/>
+                        <Column fieldName="criteriadesc"/>
+                        <Column fieldName="parent"/>
+                        <Column fieldName="criterias_userid"/>
+                        <Column fieldName="appid"/>
+                      </QuickFilter>
+                      <FilterBuilder>
+                        <Column fieldName="id"/>
+                        <Column fieldName="code"/>
+                        <Column fieldName="criteriadesc"/>
+                        <Column fieldName="parent"/>
+                        <Column fieldName="criterias_userid"/>
+                        <Column fieldName="appid"/>
+                      </FilterBuilder>
+                      <Print>
+                        <Column fieldName="id"/>
+                        <Column fieldName="code"/>
+                        <Column fieldName="criteriadesc"/>
+                        <Column fieldName="parent"/>
+                        <Column fieldName="criterias_userid"/>
+                        <Column fieldName="appid"/>
+                      </Print>
+                      <Export>
+                        <Column fieldName="id"/>
+                        <Column fieldName="code"/>
+                        <Column fieldName="criteriadesc"/>
+                        <Column fieldName="parent"/>
+                        <Column fieldName="criterias_userid"/>
+                        <Column fieldName="appid"/>
+                      </Export>
+                      <Compare>
+                        <Column fieldName="id"/>
+                        <Column fieldName="code"/>
+                        <Column fieldName="criteriadesc"/>
+                        <Column fieldName="parent"/>
+                        <Column fieldName="criterias_userid"/>
+                        <Column fieldName="appid"/>
+                      </Compare>
+                      <MultiEdit>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="code"/>
+                        <Column fieldName="criteriadesc"/>
+                        <Column fieldName="parent"/>
+                        <Column fieldName="criterias_userid" visible="false"/>
+                        <Column fieldName="appid" visible="false"/>
+                      </MultiEdit>
+                    </Columns>
+                    <Details>
+                      <Detail caption="Criteria Testcase">
+                        <Page type="table" tableName="criteria_testcase" numberByDataSource="0" fileName="" caption="Criteria Testcase" shortCaption="Criteria Testcase" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+                          <BeforeGridText/>
+                          <DetailedDescription/>
+                          <ColumnPresentations>
+                            <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1573119">
+                              <ViewProperties type="text">
+                                <Format type="number" thousandSeparator=","/>
+                              </ViewProperties>
+                              <EditProperties type="textBox" maxLength="0"/>
+                            </ColumnPresentation>
+                            <ColumnPresentation fieldName="criteriaid" caption="Criteriaid" readOnly="true" selectedFilterOperators="1589247">
+                              <Lookup tableName="criterias" linkFieldName="id" displayFieldName="code" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                              <ViewProperties type="text" maxLength="75"/>
+                              <EditProperties type="dynamicCombobox"/>
+                            </ColumnPresentation>
+                            <ColumnPresentation fieldName="testcaseid" caption="Testcaseid" selectedFilterOperators="1589247">
+                              <Lookup tableName="testcases" linkFieldName="id" displayFieldName="tfsid" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                              <ViewProperties type="text"/>
+                              <EditProperties type="dynamicCombobox"/>
+                            </ColumnPresentation>
+                          </ColumnPresentations>
+                          <Columns>
+                            <List>
+                              <Column fieldName="id" visible="false"/>
+                              <Column fieldName="criteriaid" visible="false"/>
+                              <Column fieldName="testcaseid"/>
+                            </List>
+                            <View>
+                              <Column fieldName="id"/>
+                              <Column fieldName="criteriaid"/>
+                              <Column fieldName="testcaseid"/>
+                            </View>
+                            <Edit>
+                              <Column fieldName="id" visible="false"/>
+                              <Column fieldName="criteriaid"/>
+                              <Column fieldName="testcaseid"/>
+                            </Edit>
+                            <Insert>
+                              <Column fieldName="id" visible="false"/>
+                              <Column fieldName="criteriaid"/>
+                              <Column fieldName="testcaseid"/>
+                            </Insert>
+                            <QuickFilter>
+                              <Column fieldName="id"/>
+                              <Column fieldName="criteriaid"/>
+                              <Column fieldName="testcaseid"/>
+                            </QuickFilter>
+                            <FilterBuilder>
+                              <Column fieldName="id"/>
+                              <Column fieldName="criteriaid"/>
+                              <Column fieldName="testcaseid"/>
+                            </FilterBuilder>
+                            <Print>
+                              <Column fieldName="id"/>
+                              <Column fieldName="criteriaid"/>
+                              <Column fieldName="testcaseid"/>
+                            </Print>
+                            <Export>
+                              <Column fieldName="id"/>
+                              <Column fieldName="criteriaid"/>
+                              <Column fieldName="testcaseid"/>
+                            </Export>
+                            <Compare>
+                              <Column fieldName="id" visible="false"/>
+                              <Column fieldName="criteriaid"/>
+                              <Column fieldName="testcaseid"/>
+                            </Compare>
+                            <MultiEdit>
+                              <Column fieldName="id" visible="false"/>
+                              <Column fieldName="criteriaid"/>
+                              <Column fieldName="testcaseid"/>
+                            </MultiEdit>
+                          </Columns>
+                          <Details/>
+                          <RecordPermissions useRecordPermissions="false"/>
+                          <PartitionNavigators/>
+                        </Page>
+                        <MasterForeignKeyColumnMap>
+                          <FieldMap masterColumnName="id" foreginColumnName="criteriaid"/>
+                        </MasterForeignKeyColumnMap>
+                      </Detail>
+                    </Details>
+                    <RecordPermissions useRecordPermissions="false"/>
+                    <PartitionNavigators/>
+                  </Page>
+                  <MasterForeignKeyColumnMap>
+                    <FieldMap masterColumnName="id" foreginColumnName="appid"/>
+                  </MasterForeignKeyColumnMap>
+                </Detail>
+              </Details>
+              <EventHandlers>
+                <OnPreparePage enabled="true">
+if (GetApplication()-&gt;GetGETValue('operation') == 'copy' &amp;&amp; GetApplication()-&gt;IsGETValueSet('pk0')) {
+  GetApplication()-&gt;SetSessionVariable('copied_app_pk', GetApplication()-&gt;GetGETValue('pk0'));
+}                </OnPreparePage>
+                <AfterInsertRecord enabled="true">
+$oldfeatureid = GetApplication()-&gt;GetSessionVariable('copied_app_pk');
+            if($oldfeatureid != &quot;&quot;){
+            $user = $page-&gt;GetEnvVar('CURRENT_USER_ID');
+            $name = $rowData['application'];
+            $sql1 = &quot;select id from applications where application = '$name' ORDER by createdate DESC LIMIT 1&quot;;
+            $result = $this-&gt;GetConnection()-&gt;fetchAll($sql1);
+            $newfeatureid = &quot;&quot;;
+            if (!empty($result)) {
+                   foreach ($result as $row) {
+                           $newfeatureid = $row['id'];
+                   }
+            }
+            
+            //$lastInsertId = $page-&gt;GetConnection()-&gt;GetLastInsertId();
+            
+            $sql =&quot;INSERT INTO `criterias`( `code`, `criteriadesc`, `appid`, `parent`, `criterias_userid`) select `code`, `criteriadesc`, '$newfeatureid', `parent`, '$user' from `criterias` where appid = '$oldfeatureid'&quot;;
+            $this-&gt;GetConnection()-&gt;ExecSQL($sql);
+            
+            GetApplication()-&gt;SetSessionVariable('copied_app_pk',&quot;&quot;);
+            }                </AfterInsertRecord>
+              </EventHandlers>
+              <RecordPermissions useRecordPermissions="false"/>
+              <PartitionNavigators/>
+            </Page>
+            <MasterForeignKeyColumnMap>
+              <FieldMap masterColumnName="teamid" foreginColumnName="teamid"/>
+            </MasterForeignKeyColumnMap>
+          </Detail>
+          <Detail caption="Elements">
+            <Page type="table" tableName="elements" numberByDataSource="0" fileName="" caption="Elements" shortCaption="Elements" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+              <BeforeGridText/>
+              <DetailedDescription/>
+              <ColumnPresentations>
+                <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1589247">
+                  <ViewProperties type="text"/>
+                  <EditProperties type="textBox" maxLength="36"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="name" caption="Name" showColumnFilter="false" selectedFilterOperators="1589247">
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="xpathid" caption="Xpathid" showColumnFilter="false" selectedFilterOperators="1589247">
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="elements_userid" caption="Elements Userid" controlVisible="false" defaultInsertValue="%CURRENT_USER_ID%" selectedFilterOperators="1589247">
+                  <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="teamid" caption="Teamid" canSetNull="true" controlVisible="false" selectedFilterOperators="1589247">
+                  <Lookup tableName="teams" linkFieldName="teamid" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+              </ColumnPresentations>
+              <Columns>
+                <List>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="xpathid"/>
+                  <Column fieldName="elements_userid" visible="false"/>
+                  <Column fieldName="teamid" visible="false"/>
+                </List>
+                <View>
+                  <Column fieldName="id"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="xpathid"/>
+                  <Column fieldName="elements_userid"/>
+                  <Column fieldName="teamid"/>
+                </View>
+                <Edit>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="xpathid"/>
+                  <Column fieldName="elements_userid" visible="false"/>
+                  <Column fieldName="teamid" visible="false"/>
+                </Edit>
+                <Insert>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="xpathid"/>
+                  <Column fieldName="elements_userid"/>
+                  <Column fieldName="teamid"/>
+                </Insert>
+                <QuickFilter>
+                  <Column fieldName="id"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="xpathid"/>
+                  <Column fieldName="elements_userid"/>
+                  <Column fieldName="teamid"/>
+                </QuickFilter>
+                <FilterBuilder>
+                  <Column fieldName="id"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="xpathid"/>
+                  <Column fieldName="elements_userid"/>
+                  <Column fieldName="teamid"/>
+                </FilterBuilder>
+                <Print>
+                  <Column fieldName="id"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="xpathid"/>
+                  <Column fieldName="elements_userid"/>
+                  <Column fieldName="teamid"/>
+                </Print>
+                <Export>
+                  <Column fieldName="id"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="xpathid"/>
+                  <Column fieldName="elements_userid"/>
+                  <Column fieldName="teamid"/>
+                </Export>
+                <Compare>
+                  <Column fieldName="id"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="xpathid"/>
+                  <Column fieldName="elements_userid"/>
+                  <Column fieldName="teamid"/>
+                </Compare>
+                <MultiEdit>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="xpathid"/>
+                  <Column fieldName="elements_userid" visible="false"/>
+                  <Column fieldName="teamid" visible="false"/>
+                </MultiEdit>
+              </Columns>
+              <Details/>
+              <RecordPermissions useRecordPermissions="false"/>
+              <PartitionNavigators/>
+            </Page>
+            <MasterForeignKeyColumnMap>
+              <FieldMap masterColumnName="teamid" foreginColumnName="teamid"/>
+            </MasterForeignKeyColumnMap>
+          </Detail>
+          <Detail caption="Testcases">
+            <Page type="table" tableName="testcases" numberByDataSource="0" fileName="" caption="Testcases" shortCaption="Testcases" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+              <BeforeGridText/>
+              <DetailedDescription/>
+              <ColumnPresentations>
+                <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1589247">
+                  <ViewProperties type="text"/>
+                  <EditProperties type="textBox" maxLength="36"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="tfsid" caption="Tfsid" showColumnFilter="false" canSetNull="true" selectedFilterOperators="1589247">
+                  <ViewProperties type="text"/>
+                  <EditProperties type="textBox" maxLength="10"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="name" caption="Name" showColumnFilter="false" selectedFilterOperators="1589247">
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="teamid" caption="Teamid" controlVisible="false" selectedFilterOperators="1589247">
+                  <Lookup tableName="teams" linkFieldName="teamid" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="status" caption="Status" defaultInsertValue="1" selectedFilterOperators="1589247">
+                  <Lookup tableName="tcstatus" linkFieldName="id" displayFieldName="status" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="testcases_userid" caption="Testcases Userid" controlVisible="false" defaultInsertValue="%CURRENT_USER_ID%" selectedFilterOperators="1589247">
+                  <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="ui" caption="Ui" selectedFilterOperators="1572867">
+                  <ViewProperties type="checkBox" displayType="image"/>
+                  <EditProperties type="checkBox"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="createdate" caption="Createdate" canSetNull="true" controlVisible="false" defaultInsertValue="%CURRENT_DATETIME%" selectedFilterOperators="2031871">
+                  <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+                  <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="lastupdate" caption="Lastupdate" canSetNull="true" controlVisible="false" defaultInsertValue="%CURRENT_DATETIME%" selectedFilterOperators="2031871">
+                  <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+                  <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+                </ColumnPresentation>
+              </ColumnPresentations>
+              <Columns>
+                <List>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="tfsid"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="teamid" visible="false"/>
+                  <Column fieldName="status"/>
+                  <Column fieldName="testcases_userid" visible="false"/>
+                  <Column fieldName="ui"/>
+                  <Column fieldName="createdate" visible="false"/>
+                  <Column fieldName="lastupdate" visible="false"/>
+                </List>
+                <View>
+                  <Column fieldName="id"/>
+                  <Column fieldName="tfsid"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="status"/>
+                  <Column fieldName="testcases_userid"/>
+                  <Column fieldName="ui"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastupdate"/>
+                </View>
+                <Edit>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="tfsid"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="teamid" visible="false"/>
+                  <Column fieldName="status"/>
+                  <Column fieldName="testcases_userid" visible="false"/>
+                  <Column fieldName="ui"/>
+                  <Column fieldName="createdate" visible="false"/>
+                  <Column fieldName="lastupdate" visible="false"/>
+                </Edit>
+                <Insert>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="tfsid"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="status"/>
+                  <Column fieldName="testcases_userid"/>
+                  <Column fieldName="ui"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastupdate"/>
+                </Insert>
+                <QuickFilter>
+                  <Column fieldName="id"/>
+                  <Column fieldName="tfsid"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="status"/>
+                  <Column fieldName="testcases_userid"/>
+                  <Column fieldName="ui"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastupdate"/>
+                </QuickFilter>
+                <FilterBuilder>
+                  <Column fieldName="id"/>
+                  <Column fieldName="tfsid"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="status"/>
+                  <Column fieldName="testcases_userid"/>
+                  <Column fieldName="ui"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastupdate"/>
+                </FilterBuilder>
+                <Print>
+                  <Column fieldName="id"/>
+                  <Column fieldName="tfsid"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="status"/>
+                  <Column fieldName="testcases_userid"/>
+                  <Column fieldName="ui"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastupdate"/>
+                </Print>
+                <Export>
+                  <Column fieldName="id"/>
+                  <Column fieldName="tfsid"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="status"/>
+                  <Column fieldName="testcases_userid"/>
+                  <Column fieldName="ui"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastupdate"/>
+                </Export>
+                <Compare>
+                  <Column fieldName="id"/>
+                  <Column fieldName="tfsid"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="teamid"/>
+                  <Column fieldName="status"/>
+                  <Column fieldName="testcases_userid"/>
+                  <Column fieldName="ui"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastupdate"/>
+                </Compare>
+                <MultiEdit>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="tfsid"/>
+                  <Column fieldName="name"/>
+                  <Column fieldName="teamid" visible="false"/>
+                  <Column fieldName="status"/>
+                  <Column fieldName="testcases_userid" visible="false"/>
+                  <Column fieldName="ui"/>
+                  <Column fieldName="createdate" visible="false"/>
+                  <Column fieldName="lastupdate" visible="false"/>
+                </MultiEdit>
+              </Columns>
+              <Details>
+                <Detail caption="Steps">
+                  <Page type="table" tableName="steps" numberByDataSource="0" fileName="" caption="Steps" shortCaption="Steps" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+                    <DefaultSortedColumns>
+                      <Column fieldName="steporder" orderType="0"/>
+                    </DefaultSortedColumns>
+                    <BeforeGridText/>
+                    <DetailedDescription/>
+                    <ColumnPresentations>
+                      <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" controlVisible="false" selectedFilterOperators="1589247">
+                        <ViewProperties type="text"/>
+                        <EditProperties type="textBox" maxLength="36"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="desc" caption="Desc" showColumnFilter="false" selectedFilterOperators="1589247">
+                        <ViewProperties type="text" maxLength="75"/>
+                        <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="steporder" caption="Steporder" showColumnFilter="false" selectedFilterOperators="1573119">
+                        <ViewProperties type="text">
+                          <Format type="number" thousandSeparator=","/>
+                        </ViewProperties>
+                        <EditProperties type="textBox" maxLength="0"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="action" caption="Action" selectedFilterOperators="1589247">
+                        <Lookup tableName="actions" linkFieldName="id" displayFieldName="name" lookupFilter="type = 1" useLookupOrdering="true" lookupOrdering="0" displayLookupRecord="true">
+                          <LookupRecordViewForm numberByDataSource="0" fileName="actions" caption="Actions" shortCaption="Actions" addSeparator="false" horizontalFilterCondition="" isLookupRecordViewForm="true" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+                            <BeforeGridText/>
+                            <DetailedDescription/>
+                            <ColumnPresentations>
+                              <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1573119">
+                                <ViewProperties type="text">
+                                  <Format type="number" thousandSeparator=","/>
+                                </ViewProperties>
+                                <EditProperties type="textBox" maxLength="0"/>
+                              </ColumnPresentation>
+                              <ColumnPresentation fieldName="name" caption="Name" showColumnFilter="false" selectedFilterOperators="1589247">
+                                <ViewProperties type="text" maxLength="75"/>
+                                <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                              </ColumnPresentation>
+                              <ColumnPresentation fieldName="type" caption="Type" showColumnFilter="false" selectedFilterOperators="1573119">
+                                <ViewProperties type="text">
+                                  <Format type="number" thousandSeparator=","/>
+                                </ViewProperties>
+                                <EditProperties type="textBox" maxLength="0"/>
+                              </ColumnPresentation>
+                            </ColumnPresentations>
+                            <Columns>
+                              <List>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="type"/>
+                              </List>
+                              <View>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="type"/>
+                              </View>
+                              <Edit>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="type"/>
+                              </Edit>
+                              <Insert>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="type"/>
+                              </Insert>
+                              <QuickFilter>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="type"/>
+                              </QuickFilter>
+                              <FilterBuilder>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="type"/>
+                              </FilterBuilder>
+                              <Print>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="type"/>
+                              </Print>
+                              <Export>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="type"/>
+                              </Export>
+                              <Compare>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="type"/>
+                              </Compare>
+                              <MultiEdit>
+                                <Column fieldName="id" visible="false"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="type"/>
+                              </MultiEdit>
+                            </Columns>
+                            <Details/>
+                            <RecordPermissions useRecordPermissions="false"/>
+                            <PartitionNavigators/>
+                          </LookupRecordViewForm>
+                        </Lookup>
+                        <ViewProperties type="text" maxLength="75"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="element" caption="Element" canSetNull="true" selectedFilterOperators="1589247">
+                        <Lookup tableName="elements" linkFieldName="id" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0" allowAddNewItemsOnTheFly="true" displayLookupRecord="true">
+                          <OnTheFlyInsertPage numberByDataSource="0" fileName="elements" caption="Elements" shortCaption="Elements" addSeparator="false" horizontalFilterCondition="" isOnTheFlyInsertPage="true" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+                            <BeforeGridText/>
+                            <DetailedDescription/>
+                            <ColumnPresentations>
+                              <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" controlVisible="false" selectedFilterOperators="1589247">
+                                <ViewProperties type="text"/>
+                                <EditProperties type="textBox" maxLength="36"/>
+                              </ColumnPresentation>
+                              <ColumnPresentation fieldName="name" caption="Name" showColumnFilter="false" selectedFilterOperators="1589247">
+                                <ViewProperties type="text" maxLength="75"/>
+                                <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                              </ColumnPresentation>
+                              <ColumnPresentation fieldName="xpathid" caption="Xpathid" showColumnFilter="false" selectedFilterOperators="1589247">
+                                <ViewProperties type="text" maxLength="75"/>
+                                <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                              </ColumnPresentation>
+                              <ColumnPresentation fieldName="elements_userid" caption="Elements Userid" controlVisible="false" defaultInsertValue="%CURRENT_USER_ID%" selectedFilterOperators="1589247">
+                                <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                                <ViewProperties type="text" maxLength="75"/>
+                                <EditProperties type="dynamicCombobox"/>
+                              </ColumnPresentation>
+                              <ColumnPresentation fieldName="teamid" caption="Teamid" canSetNull="true" controlVisible="false" selectedFilterOperators="1589247">
+                                <Lookup tableName="teams" linkFieldName="teamid" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                                <ViewProperties type="text" maxLength="75"/>
+                                <EditProperties type="dynamicCombobox"/>
+                              </ColumnPresentation>
+                            </ColumnPresentations>
+                            <Columns>
+                              <List>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </List>
+                              <View>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </View>
+                              <Edit>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </Edit>
+                              <Insert>
+                                <Column fieldName="id" visible="false"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid" visible="false"/>
+                              </Insert>
+                              <QuickFilter>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </QuickFilter>
+                              <FilterBuilder>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </FilterBuilder>
+                              <Print>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </Print>
+                              <Export>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </Export>
+                              <Compare>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </Compare>
+                              <MultiEdit>
+                                <Column fieldName="id" visible="false"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </MultiEdit>
+                            </Columns>
+                            <Details/>
+                            <EventHandlers>
+                              <BeforeInsertRecord enabled="true">
+$id = GetApplication()-&gt;GetSessionVariable('copied_team_fk');
+$sql1 = &quot;select teamid from testcases where id = '$id'&quot;;
+$result = $this-&gt;GetConnection()-&gt;fetchAll($sql1);
+$teamid = &quot;&quot;;
+if (!empty($result)) {
+       foreach ($result as $row) {
+               $teamid = $row['teamid'];
+       }
+}
+
+$rowData['teamid'] = $teamid;                              </BeforeInsertRecord>
+                            </EventHandlers>
+                            <RecordPermissions useRecordPermissions="false"/>
+                            <PartitionNavigators/>
+                          </OnTheFlyInsertPage>
+                          <LookupRecordViewForm numberByDataSource="0" fileName="elements" caption="Elements" shortCaption="Elements" addSeparator="false" horizontalFilterCondition="" isLookupRecordViewForm="true" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+                            <BeforeGridText/>
+                            <DetailedDescription/>
+                            <ColumnPresentations>
+                              <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1589247">
+                                <ViewProperties type="text"/>
+                                <EditProperties type="textBox" maxLength="36"/>
+                              </ColumnPresentation>
+                              <ColumnPresentation fieldName="name" caption="Name" showColumnFilter="false" selectedFilterOperators="1589247">
+                                <ViewProperties type="text" maxLength="75"/>
+                                <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                              </ColumnPresentation>
+                              <ColumnPresentation fieldName="xpathid" caption="Xpathid" showColumnFilter="false" selectedFilterOperators="1589247">
+                                <ViewProperties type="text" maxLength="75"/>
+                                <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                              </ColumnPresentation>
+                              <ColumnPresentation fieldName="elements_userid" caption="Elements Userid" selectedFilterOperators="1589247">
+                                <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                                <ViewProperties type="text" maxLength="75"/>
+                                <EditProperties type="dynamicCombobox"/>
+                              </ColumnPresentation>
+                              <ColumnPresentation fieldName="teamid" caption="Teamid" canSetNull="true" selectedFilterOperators="1589247">
+                                <Lookup tableName="teams" linkFieldName="teamid" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                                <ViewProperties type="text" maxLength="75"/>
+                                <EditProperties type="dynamicCombobox"/>
+                              </ColumnPresentation>
+                            </ColumnPresentations>
+                            <Columns>
+                              <List>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </List>
+                              <View>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </View>
+                              <Edit>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </Edit>
+                              <Insert>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </Insert>
+                              <QuickFilter>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </QuickFilter>
+                              <FilterBuilder>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </FilterBuilder>
+                              <Print>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </Print>
+                              <Export>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </Export>
+                              <Compare>
+                                <Column fieldName="id"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </Compare>
+                              <MultiEdit>
+                                <Column fieldName="id" visible="false"/>
+                                <Column fieldName="name"/>
+                                <Column fieldName="xpathid"/>
+                                <Column fieldName="elements_userid"/>
+                                <Column fieldName="teamid"/>
+                              </MultiEdit>
+                            </Columns>
+                            <Details/>
+                            <RecordPermissions useRecordPermissions="false"/>
+                            <PartitionNavigators/>
+                          </LookupRecordViewForm>
+                        </Lookup>
+                        <ViewProperties type="text" maxLength="75"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="input1" caption="Input1" showColumnFilter="false" canSetNull="true" selectedFilterOperators="1589247">
+                        <ViewProperties type="text" maxLength="75"/>
+                        <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="input2" caption="Input2" showColumnFilter="false" canSetNull="true" selectedFilterOperators="1589247">
+                        <ViewProperties type="text" maxLength="75"/>
+                        <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="testcaseid" caption="Testcaseid" controlVisible="false" selectedFilterOperators="1589247">
+                        <Lookup tableName="testcases" linkFieldName="id" displayFieldName="tfsid" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="steps_userid" caption="Steps Userid" controlVisible="false" defaultInsertValue="%CURRENT_USER_ID%" selectedFilterOperators="1589247">
+                        <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text" maxLength="75"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="approved" caption="Approved" showColumnFilter="false" canSetNull="true" controlVisible="false" defaultInsertValue="0" selectedFilterOperators="1573119">
+                        <ViewProperties type="text">
+                          <Format type="number" thousandSeparator=","/>
+                        </ViewProperties>
+                        <EditProperties type="textBox" maxLength="0"/>
+                      </ColumnPresentation>
+                    </ColumnPresentations>
+                    <Columns>
+                      <List>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="desc"/>
+                        <Column fieldName="steporder"/>
+                        <Column fieldName="action"/>
+                        <Column fieldName="element"/>
+                        <Column fieldName="input1"/>
+                        <Column fieldName="input2"/>
+                        <Column fieldName="testcaseid" visible="false"/>
+                        <Column fieldName="steps_userid" visible="false"/>
+                        <Column fieldName="approved" visible="false"/>
+                      </List>
+                      <View>
+                        <Column fieldName="id"/>
+                        <Column fieldName="desc"/>
+                        <Column fieldName="steporder"/>
+                        <Column fieldName="action"/>
+                        <Column fieldName="element"/>
+                        <Column fieldName="input1"/>
+                        <Column fieldName="input2"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="steps_userid"/>
+                        <Column fieldName="approved" visible="false"/>
+                      </View>
+                      <Edit>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="desc"/>
+                        <Column fieldName="steporder"/>
+                        <Column fieldName="action"/>
+                        <Column fieldName="element"/>
+                        <Column fieldName="input1"/>
+                        <Column fieldName="input2"/>
+                        <Column fieldName="testcaseid" visible="false"/>
+                        <Column fieldName="steps_userid" visible="false"/>
+                        <Column fieldName="approved" visible="false"/>
+                      </Edit>
+                      <Insert>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="desc"/>
+                        <Column fieldName="steporder"/>
+                        <Column fieldName="action"/>
+                        <Column fieldName="element"/>
+                        <Column fieldName="input1"/>
+                        <Column fieldName="input2"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="steps_userid"/>
+                        <Column fieldName="approved"/>
+                      </Insert>
+                      <QuickFilter>
+                        <Column fieldName="id"/>
+                        <Column fieldName="desc"/>
+                        <Column fieldName="steporder"/>
+                        <Column fieldName="action"/>
+                        <Column fieldName="element"/>
+                        <Column fieldName="input1"/>
+                        <Column fieldName="input2"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="steps_userid"/>
+                        <Column fieldName="approved"/>
+                      </QuickFilter>
+                      <FilterBuilder>
+                        <Column fieldName="id"/>
+                        <Column fieldName="desc"/>
+                        <Column fieldName="steporder"/>
+                        <Column fieldName="action"/>
+                        <Column fieldName="element"/>
+                        <Column fieldName="input1"/>
+                        <Column fieldName="input2"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="steps_userid"/>
+                        <Column fieldName="approved"/>
+                      </FilterBuilder>
+                      <Print>
+                        <Column fieldName="id"/>
+                        <Column fieldName="desc"/>
+                        <Column fieldName="steporder"/>
+                        <Column fieldName="action"/>
+                        <Column fieldName="element"/>
+                        <Column fieldName="input1"/>
+                        <Column fieldName="input2"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="steps_userid"/>
+                        <Column fieldName="approved"/>
+                      </Print>
+                      <Export>
+                        <Column fieldName="id"/>
+                        <Column fieldName="desc"/>
+                        <Column fieldName="steporder"/>
+                        <Column fieldName="action"/>
+                        <Column fieldName="element"/>
+                        <Column fieldName="input1"/>
+                        <Column fieldName="input2"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="steps_userid"/>
+                        <Column fieldName="approved"/>
+                      </Export>
+                      <Compare>
+                        <Column fieldName="id"/>
+                        <Column fieldName="desc"/>
+                        <Column fieldName="steporder"/>
+                        <Column fieldName="action"/>
+                        <Column fieldName="element"/>
+                        <Column fieldName="input1"/>
+                        <Column fieldName="input2"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="steps_userid"/>
+                        <Column fieldName="approved"/>
+                      </Compare>
+                      <MultiEdit>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="desc"/>
+                        <Column fieldName="steporder"/>
+                        <Column fieldName="action"/>
+                        <Column fieldName="element"/>
+                        <Column fieldName="input1"/>
+                        <Column fieldName="input2"/>
+                        <Column fieldName="testcaseid" visible="false"/>
+                        <Column fieldName="steps_userid" visible="false"/>
+                        <Column fieldName="approved" visible="false"/>
+                      </MultiEdit>
+                    </Columns>
+                    <Details/>
+                    <EventHandlers>
+                      <OnPreparePage enabled="true">
+if (GetApplication()-&gt;GetGETValue('operation') == 'insert' &amp;&amp; GetApplication()-&gt;IsGETValueSet('fk0')) {
+  GetApplication()-&gt;SetSessionVariable('copied_team_fk', GetApplication()-&gt;GetGETValue('fk0'));
+}                      </OnPreparePage>
+                      <OnGetCustomRecordPermissions enabled="true">
+if (GetApplication()-&gt;IsLoggedInAsAdmin()) {
+                return;
+            } 
+            
+
+$allowEdit = !$rowData['approved'];
+$allowDelete = !$rowData['approved'];
+$handled = true;
+$mergeWithDefault = false;                      </OnGetCustomRecordPermissions>
+                    </EventHandlers>
+                    <RecordPermissions useRecordPermissions="false"/>
+                    <PartitionNavigators/>
+                  </Page>
+                  <MasterForeignKeyColumnMap>
+                    <FieldMap masterColumnName="id" foreginColumnName="testcaseid"/>
+                  </MasterForeignKeyColumnMap>
+                </Detail>
+                <Detail caption="Criteria Testcase">
+                  <Page type="table" tableName="criteria_testcase" numberByDataSource="0" fileName="" caption="Criteria Testcase" shortCaption="Criteria Testcase" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+                    <BeforeGridText/>
+                    <DetailedDescription/>
+                    <ColumnPresentations>
+                      <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1573119">
+                        <ViewProperties type="text">
+                          <Format type="number" thousandSeparator=","/>
+                        </ViewProperties>
+                        <EditProperties type="textBox" maxLength="0"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="criteriaid" caption="Criteriaid" selectedFilterOperators="1589247">
+                        <Lookup tableName="criterias" linkFieldName="id" displayFieldName="code" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text" maxLength="75"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="testcaseid" caption="Testcaseid" readOnly="true" selectedFilterOperators="1589247">
+                        <Lookup tableName="testcases" linkFieldName="id" displayFieldName="tfsid" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                    </ColumnPresentations>
+                    <Columns>
+                      <List>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcaseid" visible="false"/>
+                      </List>
+                      <View>
+                        <Column fieldName="id"/>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcaseid"/>
+                      </View>
+                      <Edit>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcaseid"/>
+                      </Edit>
+                      <Insert>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcaseid"/>
+                      </Insert>
+                      <QuickFilter>
+                        <Column fieldName="id"/>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcaseid"/>
+                      </QuickFilter>
+                      <FilterBuilder>
+                        <Column fieldName="id"/>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcaseid"/>
+                      </FilterBuilder>
+                      <Print>
+                        <Column fieldName="id"/>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcaseid"/>
+                      </Print>
+                      <Export>
+                        <Column fieldName="id"/>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcaseid"/>
+                      </Export>
+                      <Compare>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcaseid"/>
+                      </Compare>
+                      <MultiEdit>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcaseid"/>
+                      </MultiEdit>
+                    </Columns>
+                    <Details/>
+                    <RecordPermissions useRecordPermissions="false"/>
+                    <PartitionNavigators/>
+                  </Page>
+                  <MasterForeignKeyColumnMap>
+                    <FieldMap masterColumnName="id" foreginColumnName="testcaseid"/>
+                  </MasterForeignKeyColumnMap>
+                </Detail>
+                <Detail caption="Run">
+                  <Page type="table" tableName="run" numberByDataSource="0" fileName="" caption="Run" shortCaption="Run" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+                    <BeforeGridText/>
+                    <DetailedDescription/>
+                    <ColumnPresentations>
+                      <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1589247">
+                        <ViewProperties type="text"/>
+                        <EditProperties type="textBox" maxLength="36"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="status" caption="Status" selectedFilterOperators="1589247">
+                        <Lookup tableName="runstatus" linkFieldName="id" displayFieldName="status" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text" maxLength="75"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="createdate" caption="Createdate" canSetNull="true" controlVisible="false" defaultInsertValue="%CURRENT_DATETIME%" selectedFilterOperators="2031871">
+                        <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+                        <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="testcaseid" caption="Testcaseid" controlVisible="false" selectedFilterOperators="1589247">
+                        <Lookup tableName="testcases" linkFieldName="id" displayFieldName="tfsid" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="env" caption="Env" selectedFilterOperators="1573119">
+                        <Lookup tableName="environments" linkFieldName="id" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="runby" caption="Runby" showColumnFilter="false" controlVisible="false" defaultInsertValue="%CURRENT_USER_ID%" selectedFilterOperators="1573119">
+                        <ViewProperties type="text">
+                          <Format type="number" thousandSeparator=","/>
+                        </ViewProperties>
+                        <EditProperties type="textBox" maxLength="0"/>
+                      </ColumnPresentation>
+                    </ColumnPresentations>
+                    <Columns>
+                      <List>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="status"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="testcaseid" visible="false"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby" visible="false"/>
+                      </List>
+                      <View>
+                        <Column fieldName="id"/>
+                        <Column fieldName="status"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </View>
+                      <Edit>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="status" visible="false"/>
+                        <Column fieldName="createdate" visible="false"/>
+                        <Column fieldName="testcaseid" visible="false"/>
+                        <Column fieldName="env" visible="false"/>
+                        <Column fieldName="runby" visible="false"/>
+                      </Edit>
+                      <Insert>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="status"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </Insert>
+                      <QuickFilter>
+                        <Column fieldName="id"/>
+                        <Column fieldName="status"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </QuickFilter>
+                      <FilterBuilder>
+                        <Column fieldName="id"/>
+                        <Column fieldName="status"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </FilterBuilder>
+                      <Print>
+                        <Column fieldName="id"/>
+                        <Column fieldName="status"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </Print>
+                      <Export>
+                        <Column fieldName="id"/>
+                        <Column fieldName="status"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </Export>
+                      <Compare>
+                        <Column fieldName="id"/>
+                        <Column fieldName="status"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="testcaseid"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </Compare>
+                      <MultiEdit>
+                        <Column fieldName="id" visible="false"/>
+                        <Column fieldName="status" visible="false"/>
+                        <Column fieldName="createdate" visible="false"/>
+                        <Column fieldName="testcaseid" visible="false"/>
+                        <Column fieldName="env" visible="false"/>
+                        <Column fieldName="runby" visible="false"/>
+                      </MultiEdit>
+                    </Columns>
+                    <Details/>
+                    <RecordPermissions useRecordPermissions="false"/>
+                    <PartitionNavigators/>
+                  </Page>
+                  <MasterForeignKeyColumnMap>
+                    <FieldMap masterColumnName="id" foreginColumnName="testcaseid"/>
+                  </MasterForeignKeyColumnMap>
+                </Detail>
+              </Details>
+              <EventHandlers>
+                <OnPreparePage enabled="true">
+if (GetApplication()-&gt;GetGETValue('operation') == 'copy' &amp;&amp; GetApplication()-&gt;IsGETValueSet('pk0')) {
+  GetApplication()-&gt;SetSessionVariable('copied_tc_pk', GetApplication()-&gt;GetGETValue('pk0'));
+}                </OnPreparePage>
+                <BeforeUpdateRecord enabled="true">
+if($rowData['status'] == 3){
+$tcid = $rowData['id'];
+$sql = &quot;UPDATE `steps` SET `approved`= 1 WHERE `testcaseid` = '$tcid'&quot;;
+$this-&gt;GetConnection()-&gt;ExecSQL($sql);
+}
+if($oldRowData['status'] == 3){
+$tcid = $rowData['id'];
+$sql = &quot;UPDATE `steps` SET `approved`= 0 WHERE `testcaseid` = '$tcid'&quot;;
+$this-&gt;GetConnection()-&gt;ExecSQL($sql);
+}                </BeforeUpdateRecord>
+                <AfterInsertRecord enabled="true">
+$oldtcid = GetApplication()-&gt;GetSessionVariable('copied_tc_pk');
+if($oldtcid != &quot;&quot;){
+
+$user = $page-&gt;GetEnvVar('CURRENT_USER_ID');
+$name = $rowData['name'];
+$sql1 = &quot;select id from testcases where name = '$name' ORDER by createdate DESC LIMIT 1&quot;;
+$result = $this-&gt;GetConnection()-&gt;fetchAll($sql1);
+$newtcid = &quot;&quot;;
+if (!empty($result)) {
+       foreach ($result as $row) {
+               $newtcid = $row['id'];
+       }
+}
+
+//$lastInsertId = $page-&gt;GetConnection()-&gt;GetLastInsertId();
+
+$sql =&quot;INSERT INTO `steps`( `desc`, `steporder`, `action`, `element`, `input1`, `input2`, `testcaseid`, `steps_userid`) select `desc`, `steporder`, `action`, `element`, `input1`, `input2`, '$newtcid', '$user' from `steps` where testcaseid = '$oldtcid'&quot;;
+$this-&gt;GetConnection()-&gt;ExecSQL($sql);
+
+GetApplication()-&gt;SetSessionVariable('copied_tc_pk',&quot;&quot;);
+}                </AfterInsertRecord>
+                <OnGetCustomRecordPermissions enabled="true">
+if (GetApplication()-&gt;IsLoggedInAsAdmin()) {
+                return;
+            } 
+            
+
+$allowEdit = $rowData['status']!= 3;
+$allowDelete = $rowData['status']!= 3;
+$handled = true;
+$mergeWithDefault = false;                </OnGetCustomRecordPermissions>
+              </EventHandlers>
+              <RecordPermissions useRecordPermissions="false"/>
+              <PartitionNavigators/>
+            </Page>
+            <MasterForeignKeyColumnMap>
+              <FieldMap masterColumnName="teamid" foreginColumnName="teamid"/>
+            </MasterForeignKeyColumnMap>
+          </Detail>
+          <Detail caption="User Teams">
+            <Page type="table" tableName="user_teams" numberByDataSource="0" fileName="" caption="User Teams" shortCaption="User Teams" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+              <BeforeGridText/>
+              <DetailedDescription/>
+              <ColumnPresentations>
+                <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1573119">
+                  <ViewProperties type="text">
+                    <Format type="number" thousandSeparator=","/>
+                  </ViewProperties>
+                  <EditProperties type="textBox" maxLength="0"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="userid" caption="Userid" selectedFilterOperators="1589247">
+                  <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="teamid" caption="Teamid" canSetNull="true" selectedFilterOperators="1589247">
+                  <Lookup tableName="teams" linkFieldName="teamid" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+              </ColumnPresentations>
+              <Columns>
+                <List>
+                  <Column fieldName="id"/>
+                  <Column fieldName="userid"/>
+                  <Column fieldName="teamid"/>
+                </List>
+                <View>
+                  <Column fieldName="id"/>
+                  <Column fieldName="userid"/>
+                  <Column fieldName="teamid"/>
+                </View>
+                <Edit>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="userid"/>
+                  <Column fieldName="teamid"/>
+                </Edit>
+                <Insert>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="userid"/>
+                  <Column fieldName="teamid"/>
+                </Insert>
+                <QuickFilter>
+                  <Column fieldName="id"/>
+                  <Column fieldName="userid"/>
+                  <Column fieldName="teamid"/>
+                </QuickFilter>
+                <FilterBuilder>
+                  <Column fieldName="id"/>
+                  <Column fieldName="userid"/>
+                  <Column fieldName="teamid"/>
+                </FilterBuilder>
+                <Print>
+                  <Column fieldName="id"/>
+                  <Column fieldName="userid"/>
+                  <Column fieldName="teamid"/>
+                </Print>
+                <Export>
+                  <Column fieldName="id"/>
+                  <Column fieldName="userid"/>
+                  <Column fieldName="teamid"/>
+                </Export>
+                <Compare>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="userid"/>
+                  <Column fieldName="teamid"/>
+                </Compare>
+                <MultiEdit>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="userid"/>
+                  <Column fieldName="teamid"/>
+                </MultiEdit>
+              </Columns>
+              <Details/>
+              <RecordPermissions useRecordPermissions="false"/>
+              <PartitionNavigators/>
+            </Page>
+            <MasterForeignKeyColumnMap>
+              <FieldMap masterColumnName="teamid" foreginColumnName="teamid"/>
+            </MasterForeignKeyColumnMap>
+          </Detail>
+        </Details>
+        <RecordPermissions useRecordPermissions="false"/>
+        <PartitionNavigators/>
+      </Page>
+      <Page type="table" tableName="questions" numberByDataSource="0" fileName="questions" caption="Questions" shortCaption="Questions" addSeparator="false" horizontalFilterCondition="qteamid in (SELECT ut.`teamid` FROM `user_teams` ut WHERE ut.`userid` = %CURRENT_USER_ID%)" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+        <BeforeGridText/>
+        <DetailedDescription/>
+        <ColumnPresentations>
+          <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1589247">
+            <ViewProperties type="text"/>
+            <EditProperties type="textBox" maxLength="36"/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="question" caption="Question" showColumnFilter="false" selectedFilterOperators="1589247">
+            <ViewProperties type="text" maxLength="75"/>
+            <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="createdate" caption="Createdate" canSetNull="true" controlVisible="false" defaultInsertValue="%CURRENT_DATETIME%" selectedFilterOperators="2031871">
+            <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+            <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="lastchange" caption="Lastchange" canSetNull="true" controlVisible="false" defaultInsertValue="%CURRENT_DATETIME%" selectedFilterOperators="2031871">
+            <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+            <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="questions_userid" caption="Questions Userid" controlVisible="false" defaultInsertValue="%CURRENT_USER_ID%" selectedFilterOperators="1589247">
+            <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+            <ViewProperties type="text" maxLength="75"/>
+            <EditProperties type="dynamicCombobox"/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="qteamid" caption="Qteamid" selectedFilterOperators="1589247">
+            <Lookup tableName="teams" linkFieldName="teamid" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+            <ViewProperties type="text" maxLength="75"/>
+            <EditProperties type="dynamicCombobox"/>
+          </ColumnPresentation>
+        </ColumnPresentations>
+        <Columns>
+          <List>
+            <Column fieldName="id" visible="false"/>
+            <Column fieldName="question"/>
+            <Column fieldName="createdate" visible="false"/>
+            <Column fieldName="lastchange" visible="false"/>
+            <Column fieldName="questions_userid"/>
+            <Column fieldName="qteamid" visible="false"/>
+          </List>
+          <View>
+            <Column fieldName="id"/>
+            <Column fieldName="question"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+            <Column fieldName="questions_userid"/>
+            <Column fieldName="qteamid"/>
+          </View>
+          <Edit>
+            <Column fieldName="id" visible="false"/>
+            <Column fieldName="question"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+            <Column fieldName="questions_userid" visible="false"/>
+            <Column fieldName="qteamid"/>
+          </Edit>
+          <Insert>
+            <Column fieldName="id" visible="false"/>
+            <Column fieldName="question"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+            <Column fieldName="questions_userid"/>
+            <Column fieldName="qteamid"/>
+          </Insert>
+          <QuickFilter>
+            <Column fieldName="id"/>
+            <Column fieldName="question"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+            <Column fieldName="questions_userid"/>
+            <Column fieldName="qteamid"/>
+          </QuickFilter>
+          <FilterBuilder>
+            <Column fieldName="id"/>
+            <Column fieldName="question"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+            <Column fieldName="questions_userid"/>
+            <Column fieldName="qteamid"/>
+          </FilterBuilder>
+          <Print>
+            <Column fieldName="id"/>
+            <Column fieldName="question"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+            <Column fieldName="questions_userid"/>
+            <Column fieldName="qteamid"/>
+          </Print>
+          <Export>
+            <Column fieldName="id"/>
+            <Column fieldName="question"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+            <Column fieldName="questions_userid"/>
+            <Column fieldName="qteamid"/>
+          </Export>
+          <Compare>
+            <Column fieldName="id"/>
+            <Column fieldName="question"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+            <Column fieldName="questions_userid"/>
+            <Column fieldName="qteamid"/>
+          </Compare>
+          <MultiEdit>
+            <Column fieldName="id" visible="false"/>
+            <Column fieldName="question"/>
+            <Column fieldName="createdate"/>
+            <Column fieldName="lastchange"/>
+            <Column fieldName="questions_userid" visible="false"/>
+            <Column fieldName="qteamid"/>
+          </MultiEdit>
+        </Columns>
+        <Details>
+          <Detail caption="Answers">
+            <Page type="table" tableName="answers" numberByDataSource="0" fileName="" caption="Answers" shortCaption="Answers" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+              <BeforeGridText/>
+              <DetailedDescription/>
+              <ColumnPresentations>
+                <ColumnPresentation fieldName="id" caption="Id" showColumnFilter="false" selectedFilterOperators="1589247">
+                  <ViewProperties type="text"/>
+                  <EditProperties type="textBox" maxLength="36"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="answer" caption="Answer" showColumnFilter="false" selectedFilterOperators="1589247">
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="textArea" columnCount="50" rowCount="8" placeholder=""/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="questionid" caption="Questionid" selectedFilterOperators="1589247">
+                  <Lookup tableName="questions" linkFieldName="id" displayFieldName="question" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="createdate" caption="Createdate" canSetNull="true" controlVisible="false" defaultInsertValue="%CURRENT_DATETIME%" selectedFilterOperators="2031871">
+                  <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+                  <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="lastchange" caption="Lastchange" canSetNull="true" controlVisible="false" defaultInsertValue="%CURRENT_DATETIME%" selectedFilterOperators="2031871">
+                  <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+                  <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="answers_userid" caption="Answers Userid" controlVisible="false" defaultInsertValue="%CURRENT_USER_ID%" selectedFilterOperators="1589247">
+                  <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text" maxLength="75"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+              </ColumnPresentations>
+              <Columns>
+                <List>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="answer"/>
+                  <Column fieldName="questionid" visible="false"/>
+                  <Column fieldName="createdate" visible="false"/>
+                  <Column fieldName="lastchange" visible="false"/>
+                  <Column fieldName="answers_userid"/>
+                </List>
+                <View>
+                  <Column fieldName="id"/>
+                  <Column fieldName="answer"/>
+                  <Column fieldName="questionid"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="answers_userid"/>
+                </View>
+                <Edit>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="answer"/>
+                  <Column fieldName="questionid" visible="false"/>
+                  <Column fieldName="createdate" visible="false"/>
+                  <Column fieldName="lastchange" visible="false"/>
+                  <Column fieldName="answers_userid" visible="false"/>
+                </Edit>
+                <Insert>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="answer"/>
+                  <Column fieldName="questionid"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="answers_userid"/>
+                </Insert>
+                <QuickFilter>
+                  <Column fieldName="id"/>
+                  <Column fieldName="answer"/>
+                  <Column fieldName="questionid"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="answers_userid"/>
+                </QuickFilter>
+                <FilterBuilder>
+                  <Column fieldName="id"/>
+                  <Column fieldName="answer"/>
+                  <Column fieldName="questionid"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="answers_userid"/>
+                </FilterBuilder>
+                <Print>
+                  <Column fieldName="id"/>
+                  <Column fieldName="answer"/>
+                  <Column fieldName="questionid"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="answers_userid"/>
+                </Print>
+                <Export>
+                  <Column fieldName="id"/>
+                  <Column fieldName="answer"/>
+                  <Column fieldName="questionid"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="answers_userid"/>
+                </Export>
+                <Compare>
+                  <Column fieldName="id"/>
+                  <Column fieldName="answer"/>
+                  <Column fieldName="questionid"/>
+                  <Column fieldName="createdate"/>
+                  <Column fieldName="lastchange"/>
+                  <Column fieldName="answers_userid"/>
+                </Compare>
+                <MultiEdit>
+                  <Column fieldName="id" visible="false"/>
+                  <Column fieldName="answer"/>
+                  <Column fieldName="questionid" visible="false"/>
+                  <Column fieldName="createdate" visible="false"/>
+                  <Column fieldName="lastchange" visible="false"/>
+                  <Column fieldName="answers_userid" visible="false"/>
+                </MultiEdit>
+              </Columns>
+              <Details/>
+              <RecordPermissions useRecordPermissions="false"/>
+              <PartitionNavigators/>
+            </Page>
+            <MasterForeignKeyColumnMap>
+              <FieldMap masterColumnName="id" foreginColumnName="questionid"/>
+            </MasterForeignKeyColumnMap>
+          </Detail>
+        </Details>
+        <RecordPermissions useRecordPermissions="false"/>
+        <PartitionNavigators/>
+      </Page>
+      <Page type="query" queryName="RTM" numberByDataSource="0" fileName="RTM" caption="RTM" shortCaption="RTM" addSeparator="false" horizontalFilterCondition="rtm_teamid in (SELECT `teamid` FROM `user_teams` WHERE `userid` = %CURRENT_USER_ID%)" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="0" viewAbilityMode="0" editAbilityMode="0" multiEditAbility="0" copyAbilityMode="0" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+        <BeforeGridText/>
+        <DetailedDescription/>
+        <ColumnPresentations>
+          <ColumnPresentation fieldName="rtm_teamid" caption="Rtm Teamid" selectedFilterOperators="1589247">
+            <Lookup tableName="teams" linkFieldName="teamid" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+            <ViewProperties type="text"/>
+            <EditProperties type="dynamicCombobox"/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="appid" caption="Appid" selectedFilterOperators="1589247">
+            <Lookup tableName="applications" linkFieldName="id" displayFieldName="application" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+            <ViewProperties type="text"/>
+            <EditProperties type="dynamicCombobox"/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="covered" caption="Covered" showColumnFilter="false" selectedFilterOperators="1589247">
+            <ViewProperties type="text"/>
+            <EditProperties type="textBox" maxLength="0"/>
+          </ColumnPresentation>
+          <ColumnPresentation fieldName="appstatus" caption="Appstatus" selectedFilterOperators="1573119">
+            <Lookup tableName="runstatus" linkFieldName="id" displayFieldName="status" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+            <ViewProperties type="text"/>
+            <EditProperties type="dynamicCombobox"/>
+          </ColumnPresentation>
+        </ColumnPresentations>
+        <Columns>
+          <List>
+            <Column fieldName="rtm_teamid" visible="false"/>
+            <Column fieldName="appid"/>
+            <Column fieldName="covered"/>
+            <Column fieldName="appstatus"/>
+          </List>
+          <View>
+            <Column fieldName="rtm_teamid"/>
+            <Column fieldName="appid"/>
+            <Column fieldName="covered"/>
+            <Column fieldName="appstatus"/>
+          </View>
+          <Edit>
+            <Column fieldName="rtm_teamid"/>
+            <Column fieldName="appid"/>
+            <Column fieldName="covered"/>
+            <Column fieldName="appstatus"/>
+          </Edit>
+          <Insert>
+            <Column fieldName="rtm_teamid"/>
+            <Column fieldName="appid"/>
+            <Column fieldName="covered"/>
+            <Column fieldName="appstatus"/>
+          </Insert>
+          <QuickFilter>
+            <Column fieldName="rtm_teamid"/>
+            <Column fieldName="appid"/>
+            <Column fieldName="covered"/>
+            <Column fieldName="appstatus"/>
+          </QuickFilter>
+          <FilterBuilder>
+            <Column fieldName="rtm_teamid"/>
+            <Column fieldName="appid"/>
+            <Column fieldName="covered"/>
+            <Column fieldName="appstatus"/>
+          </FilterBuilder>
+          <Print>
+            <Column fieldName="rtm_teamid"/>
+            <Column fieldName="appid"/>
+            <Column fieldName="covered"/>
+            <Column fieldName="appstatus"/>
+          </Print>
+          <Export>
+            <Column fieldName="rtm_teamid"/>
+            <Column fieldName="appid"/>
+            <Column fieldName="covered"/>
+            <Column fieldName="appstatus"/>
+          </Export>
+          <Compare>
+            <Column fieldName="rtm_teamid"/>
+            <Column fieldName="appid"/>
+            <Column fieldName="covered"/>
+            <Column fieldName="appstatus"/>
+          </Compare>
+          <MultiEdit>
+            <Column fieldName="rtm_teamid"/>
+            <Column fieldName="appid"/>
+            <Column fieldName="covered"/>
+            <Column fieldName="appstatus"/>
+          </MultiEdit>
+        </Columns>
+        <Details>
+          <Detail caption="RTMT">
+            <Page type="query" queryName="RTMT" numberByDataSource="0" fileName="" caption="RTMT" shortCaption="RTMT" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="0" viewAbilityMode="0" editAbilityMode="0" multiEditAbility="0" copyAbilityMode="0" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+              <BeforeGridText/>
+              <DetailedDescription/>
+              <ColumnPresentations>
+                <ColumnPresentation fieldName="rtm_teamid" caption="Rtm Teamid" showColumnFilter="false" selectedFilterOperators="1589247">
+                  <ViewProperties type="text"/>
+                  <EditProperties type="textBox" maxLength="0"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="appid" caption="Appid" selectedFilterOperators="1589247">
+                  <Lookup tableName="applications" linkFieldName="id" displayFieldName="application" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="criteriaid" caption="Criteriaid" selectedFilterOperators="1589247">
+                  <Lookup tableName="criterias" linkFieldName="id" displayFieldName="criteriadesc" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="covered" caption="Covered" showColumnFilter="false" selectedFilterOperators="1573119">
+                  <ViewProperties type="text"/>
+                  <EditProperties type="textBox" maxLength="0"/>
+                </ColumnPresentation>
+                <ColumnPresentation fieldName="tcstatus" caption="Tcstatus" selectedFilterOperators="1573119">
+                  <Lookup tableName="runstatus" linkFieldName="id" displayFieldName="status" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                  <ViewProperties type="text"/>
+                  <EditProperties type="dynamicCombobox"/>
+                </ColumnPresentation>
+              </ColumnPresentations>
+              <Columns>
+                <List>
+                  <Column fieldName="rtm_teamid" visible="false"/>
+                  <Column fieldName="appid" visible="false"/>
+                  <Column fieldName="criteriaid"/>
+                  <Column fieldName="covered"/>
+                  <Column fieldName="tcstatus"/>
+                </List>
+                <View>
+                  <Column fieldName="rtm_teamid"/>
+                  <Column fieldName="appid"/>
+                  <Column fieldName="criteriaid"/>
+                  <Column fieldName="covered"/>
+                  <Column fieldName="tcstatus"/>
+                </View>
+                <Edit>
+                  <Column fieldName="rtm_teamid"/>
+                  <Column fieldName="appid"/>
+                  <Column fieldName="criteriaid"/>
+                  <Column fieldName="covered"/>
+                  <Column fieldName="tcstatus"/>
+                </Edit>
+                <Insert>
+                  <Column fieldName="rtm_teamid"/>
+                  <Column fieldName="appid"/>
+                  <Column fieldName="criteriaid"/>
+                  <Column fieldName="covered"/>
+                  <Column fieldName="tcstatus"/>
+                </Insert>
+                <QuickFilter>
+                  <Column fieldName="rtm_teamid"/>
+                  <Column fieldName="appid"/>
+                  <Column fieldName="criteriaid"/>
+                  <Column fieldName="covered"/>
+                  <Column fieldName="tcstatus"/>
+                </QuickFilter>
+                <FilterBuilder>
+                  <Column fieldName="rtm_teamid"/>
+                  <Column fieldName="appid"/>
+                  <Column fieldName="criteriaid"/>
+                  <Column fieldName="covered"/>
+                  <Column fieldName="tcstatus"/>
+                </FilterBuilder>
+                <Print>
+                  <Column fieldName="rtm_teamid"/>
+                  <Column fieldName="appid"/>
+                  <Column fieldName="criteriaid"/>
+                  <Column fieldName="covered"/>
+                  <Column fieldName="tcstatus"/>
+                </Print>
+                <Export>
+                  <Column fieldName="rtm_teamid"/>
+                  <Column fieldName="appid"/>
+                  <Column fieldName="criteriaid"/>
+                  <Column fieldName="covered"/>
+                  <Column fieldName="tcstatus"/>
+                </Export>
+                <Compare>
+                  <Column fieldName="rtm_teamid"/>
+                  <Column fieldName="appid"/>
+                  <Column fieldName="criteriaid"/>
+                  <Column fieldName="covered"/>
+                  <Column fieldName="tcstatus"/>
+                </Compare>
+                <MultiEdit>
+                  <Column fieldName="rtm_teamid"/>
+                  <Column fieldName="appid"/>
+                  <Column fieldName="criteriaid"/>
+                  <Column fieldName="covered"/>
+                  <Column fieldName="tcstatus"/>
+                </MultiEdit>
+              </Columns>
+              <Details>
+                <Detail caption="RTMD">
+                  <Page type="query" queryName="RTMD" numberByDataSource="0" fileName="" caption="RTMD" shortCaption="RTMD" addSeparator="false" horizontalFilterCondition="" recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="0" viewAbilityMode="0" editAbilityMode="0" multiEditAbility="0" copyAbilityMode="0" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false">
+                    <BeforeGridText/>
+                    <DetailedDescription/>
+                    <ColumnPresentations>
+                      <ColumnPresentation fieldName="criteriaid" caption="Criteriaid" selectedFilterOperators="1589247">
+                        <Lookup tableName="criterias" linkFieldName="id" displayFieldName="criteriadesc" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="testcases" caption="Testcases" selectedFilterOperators="1589247">
+                        <Lookup tableName="testcases" linkFieldName="id" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="lastrun" caption="Lastrun" selectedFilterOperators="1573119">
+                        <Lookup tableName="runstatus" linkFieldName="id" displayFieldName="status" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="createdate" caption="Createdate" selectedFilterOperators="2031871">
+                        <ViewProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s"/>
+                        <EditProperties type="dateTime" dateTimeFormat="Y-m-d H:i:s" firstDayOfWeek="0"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="env" caption="Env" selectedFilterOperators="1573119">
+                        <Lookup tableName="environments" linkFieldName="id" displayFieldName="name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                      <ColumnPresentation fieldName="runby" caption="Runby" selectedFilterOperators="1573119">
+                        <Lookup tableName="users" linkFieldName="id" displayFieldName="user_name" lookupFilter="" useLookupOrdering="true" lookupOrdering="0"/>
+                        <ViewProperties type="text"/>
+                        <EditProperties type="dynamicCombobox"/>
+                      </ColumnPresentation>
+                    </ColumnPresentations>
+                    <Columns>
+                      <List>
+                        <Column fieldName="criteriaid" visible="false"/>
+                        <Column fieldName="testcases"/>
+                        <Column fieldName="lastrun"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </List>
+                      <View>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcases"/>
+                        <Column fieldName="lastrun"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </View>
+                      <Edit>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcases"/>
+                        <Column fieldName="lastrun"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </Edit>
+                      <Insert>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcases"/>
+                        <Column fieldName="lastrun"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </Insert>
+                      <QuickFilter>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcases"/>
+                        <Column fieldName="lastrun"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </QuickFilter>
+                      <FilterBuilder>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcases"/>
+                        <Column fieldName="lastrun"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </FilterBuilder>
+                      <Print>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcases"/>
+                        <Column fieldName="lastrun"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </Print>
+                      <Export>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcases"/>
+                        <Column fieldName="lastrun"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </Export>
+                      <Compare>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcases"/>
+                        <Column fieldName="lastrun"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </Compare>
+                      <MultiEdit>
+                        <Column fieldName="criteriaid"/>
+                        <Column fieldName="testcases"/>
+                        <Column fieldName="lastrun"/>
+                        <Column fieldName="createdate"/>
+                        <Column fieldName="env"/>
+                        <Column fieldName="runby"/>
+                      </MultiEdit>
+                    </Columns>
+                    <Details/>
+                    <RecordPermissions useRecordPermissions="false"/>
+                    <PartitionNavigators/>
+                  </Page>
+                  <MasterForeignKeyColumnMap>
+                    <FieldMap masterColumnName="criteriaid" foreginColumnName="criteriaid"/>
+                  </MasterForeignKeyColumnMap>
+                </Detail>
+              </Details>
+              <RecordPermissions useRecordPermissions="false"/>
+              <PartitionNavigators/>
+            </Page>
+            <MasterForeignKeyColumnMap>
+              <FieldMap masterColumnName="appid" foreginColumnName="appid"/>
+            </MasterForeignKeyColumnMap>
+          </Detail>
+        </Details>
+        <RecordPermissions useRecordPermissions="false"/>
+        <PartitionNavigators/>
+      </Page>
+    </Pages>
+    <UserAuthorization type="tableBased" tableName="users" userIdField="id" userNameField="user_name" passwordField="user_password" userEmailField="user_email" userTokenField="user_token" userStatusField="user_status" passwordEncryption="SHA256" allowUserToChangePassword="true" selfRegistrationEnabled="true" recoveringPasswordEnabled="true"/>
+    <UserGrants enableGuestAccess="false" storageType="table">
+      <UserGrantsStorage userPermsTableName="phpgen_user_perms" userPermsUserId="user_id" userPermsPageName="page_name" userPermsAcl="perm_name"/>
+    </UserGrants>
+    <Header/>
+    <Footer/>
+    <PHPOptions/>
+    <Groups>
+      <Group caption="No group"/>
+    </Groups>
+    <outgoingMailSettings mailer="1" fromEmail="hello@luatsqa.com" fromName="Luat SQA" smtp_host="smtp.ionos.com" smtp_port="587" smpt_use_authentication="true" smpt_username="hello@luatsqa.com" smpt_password="U.W8[/SWJ:JKNP~~" smpt_encryption="2"/>
+  </Presentation>
+  <UserCSS/>
+  <PdfUserStyles/>
+  <PrintUserStyles/>
+  <UserJS/>
+  <ExcludedPaths/>
+  <DefaultPageProperties recordsPerPage="20" NavigatorPosition="3" insertAbilityMode="1" deleteAbilityMode="3" deleteSelectedAbilityMode="3" contentEncoding="UTF-8" exportAllRecordsAvailable="31" exportSelectedRecordsAvailable="31" exportSingleRecordFromGridAvailable="0" exportRecordFromViewFormAvailable="31" printAvailable="13" useActionImages="true" showKeyColumnsImagesInGridHeader="false"/>
+  <DefaultDataFormats numberAfterDecimal="4" DecimalSeparator="." ThousandSeparator="," DateTimeFormat="Y-m-d H:i:s" DateFormat="Y-m-d" firstDayOfWeek="0"/>
+</Project>
